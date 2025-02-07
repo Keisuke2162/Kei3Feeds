@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		67D166BD2D565689007A88AC /* Feature in Frameworks */ = {isa = PBXBuildFile; productRef = 67D166BC2D565689007A88AC /* Feature */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		677C65442D54CBAC00168BBC /* Kei3Feeds.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kei3Feeds.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		677C65732D54CD7800168BBC /* Kei3FeedsPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Kei3FeedsPackage; sourceTree = "<group>"; };
@@ -24,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				67D166BD2D565689007A88AC /* Feature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -35,6 +40,7 @@
 			children = (
 				677C65732D54CD7800168BBC /* Kei3FeedsPackage */,
 				677C65462D54CBAC00168BBC /* Kei3Feeds */,
+				67D166BB2D565689007A88AC /* Frameworks */,
 				677C65452D54CBAC00168BBC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,6 +51,13 @@
 				677C65442D54CBAC00168BBC /* Kei3Feeds.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		67D166BB2D565689007A88AC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -67,6 +80,7 @@
 			);
 			name = Kei3Feeds;
 			packageProductDependencies = (
+				67D166BC2D565689007A88AC /* Feature */,
 			);
 			productName = Kei3Feeds;
 			productReference = 677C65442D54CBAC00168BBC /* Kei3Feeds.app */;
@@ -326,6 +340,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		67D166BC2D565689007A88AC /* Feature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Feature;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 677C653C2D54CBAC00168BBC /* Project object */;
 }

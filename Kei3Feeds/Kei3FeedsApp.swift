@@ -1,10 +1,4 @@
-//
-//  Kei3FeedsApp.swift
-//  Kei3Feeds
-//
-//  Created by Kei on 2025/02/06.
-//
-
+import Feature
 import SwiftUI
 import SwiftData
 
@@ -25,7 +19,7 @@ struct Kei3FeedsApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+          RootView()
         }
         // .modelContainer(sharedModelContainer)
     }
