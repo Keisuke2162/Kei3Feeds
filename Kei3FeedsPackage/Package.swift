@@ -8,6 +8,8 @@ let package = Package(
     platforms: [.iOS(.v17)],
     products: [
       .library(name: "Feature", targets: ["Feature"]),
+      .library(name: "Core", targets: ["Core"]),
+      .library(name: "Data", targets: ["Data"]),
     ],
     dependencies: [
       .package(url: "https://github.com/nmdias/FeedKit.git", from: "9.1.2")

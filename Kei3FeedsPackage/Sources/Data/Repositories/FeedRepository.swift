@@ -3,19 +3,26 @@ import Foundation
 import Domain
 import FeedKit
 
-public class FeedRepository: FeedRepositoryProtocol {
+public final class FeedRepository: FeedRepositoryProtocol {
+  public init() {
+  }
+
   public func fetchFeed(url: URL) async throws -> CustomFeed {
     let feedParser = FeedParser(URL: url)
-    let result = feedParser.parse()
 
-    switch result {
-    case .success(let feed):
-      return transformFeed(url, feed)
-    case .failure(let failure):
-      throw failure
+    return try await withCheckedThrowingContinuation { continuation in
+      feedParser.parseAsync { [weak self] result in
+        switch result {
+        case .success(let feed):
+          guard let self else { return continuation.resume(throwing: FeedError.unknown) }
+          continuation.resume(returning: self.transformFeed(url, feed))
+        case .failure(let failure):
+          continuation.resume(throwing: failure)
+        }
+      }
     }
   }
-  
+
   private func transformFeed(_ feedURL: URL, _ feed: Feed) -> CustomFeed {
     switch feed {
     case .atom(let atomFeed):
@@ -27,6 +34,7 @@ public class FeedRepository: FeedRepositoryProtocol {
     }
   }
 
+  // TODO: UUID().uuidStringはSwiftDataのidを使うように修正
   private func transformAtomFeed(_ feedURL: URL, _ feed: AtomFeed) -> CustomFeed {
     let articles = feed.entries?.compactMap { entry -> Article? in
       guard let title = entry.title,
@@ -42,6 +50,7 @@ public class FeedRepository: FeedRepositoryProtocol {
       )
     }
     return CustomFeed(
+      id: UUID().uuidString,
       title: feed.title ?? "",
       url: feedURL.absoluteString,
       lastUpdated: feed.updated,
@@ -63,6 +72,7 @@ public class FeedRepository: FeedRepositoryProtocol {
       )
     }
     return CustomFeed(
+      id: UUID().uuidString,
       title: feed.title ?? "",
       url: feedURL.absoluteString,
       lastUpdated: feed.pubDate,
@@ -84,6 +94,7 @@ public class FeedRepository: FeedRepositoryProtocol {
       )
     }
     return CustomFeed(
+      id: UUID().uuidString,
       title: feed.title ?? "",
       url: feedURL.absoluteString,
       lastUpdated: articles?.first?.publishedAt,  // date情報ないかも

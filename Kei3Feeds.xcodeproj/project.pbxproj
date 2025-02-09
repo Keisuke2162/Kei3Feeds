@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		67D166BD2D565689007A88AC /* Feature in Frameworks */ = {isa = PBXBuildFile; productRef = 67D166BC2D565689007A88AC /* Feature */; };
+		67D166CA2D58E119007A88AC /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 67D166C92D58E119007A88AC /* Core */; };
+		67D166DE2D58F7A2007A88AC /* Data in Frameworks */ = {isa = PBXBuildFile; productRef = 67D166DD2D58F7A2007A88AC /* Data */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +31,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				67D166BD2D565689007A88AC /* Feature in Frameworks */,
+				67D166CA2D58E119007A88AC /* Core in Frameworks */,
+				67D166DE2D58F7A2007A88AC /* Data in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +85,8 @@
 			name = Kei3Feeds;
 			packageProductDependencies = (
 				67D166BC2D565689007A88AC /* Feature */,
+				67D166C92D58E119007A88AC /* Core */,
+				67D166DD2D58F7A2007A88AC /* Data */,
 			);
 			productName = Kei3Feeds;
 			productReference = 677C65442D54CBAC00168BBC /* Kei3Feeds.app */;
@@ -345,6 +351,14 @@
 		67D166BC2D565689007A88AC /* Feature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Feature;
+		};
+		67D166C92D58E119007A88AC /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
+		};
+		67D166DD2D58F7A2007A88AC /* Data */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Data;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
