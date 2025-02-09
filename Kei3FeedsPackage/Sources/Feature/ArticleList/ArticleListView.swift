@@ -2,7 +2,7 @@ import Core
 import SwiftUI
 
 public struct ArticleListView: View {
-
+  @Environment(\.colorScheme) var colorScheme
   let articles: [Article]
 
   public init(articles: [Article]) {
@@ -27,7 +27,7 @@ public struct ArticleListView: View {
               }
             }
           }
-          .foregroundStyle(Color.black)
+          .foregroundStyle(colorScheme == .dark ? .white : .black)
         }
       }
     }
