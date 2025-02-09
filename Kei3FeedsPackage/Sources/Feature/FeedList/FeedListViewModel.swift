@@ -7,13 +7,19 @@ import Domain
 public class FeedListViewModel: ObservableObject {
   let feedRepository: any FeedRepositoryProtocol
   @Published var customFeeds: [CustomFeed] = []
+  
+  // MEMO: onAppearを2回目移行実行させないためのフラグ。あんま使いたくない
+  var isLoaded: Bool = false
 
   public init(feedRepository: any FeedRepositoryProtocol) {
     self.feedRepository = feedRepository
   }
 
   public func onAppear(feeds: [FeedModel]) {
-    makeCustomFeeds(feeds: feeds)
+    if !isLoaded {
+      makeCustomFeeds(feeds: feeds)
+      isLoaded = true
+    }
   }
 
   public func onChangedFeeds(feeds: [FeedModel]) {
@@ -29,6 +35,7 @@ public class FeedListViewModel: ObservableObject {
   }
 
   private func makeCustomFeeds(feeds: [FeedModel]) {
+    customFeeds.removeAll()
     let urls = feeds.map { $0.url }
     
     // TODO: ここどうなの？

@@ -1,9 +1,12 @@
 import Foundation
 
-public struct Article: Sendable {
+public struct Article: Sendable, Hashable {
   public let title: String
   public let link: String
   public let publishedAt: Date?
+  public var published: String? {
+    publishedAt?.toString()
+  }
   public let imageURL: String?
   public let description: String
 

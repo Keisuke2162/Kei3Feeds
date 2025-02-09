@@ -50,7 +50,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
       )
     }
     return CustomFeed(
-      id: UUID().uuidString,
+//      id: UUID().uuidString,
       title: feed.title ?? "",
       url: feedURL.absoluteString,
       lastUpdated: feed.updated,
@@ -72,7 +72,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
       )
     }
     return CustomFeed(
-      id: UUID().uuidString,
+//      id: UUID().uuidString,
       title: feed.title ?? "",
       url: feedURL.absoluteString,
       lastUpdated: feed.pubDate,
@@ -94,7 +94,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
       )
     }
     return CustomFeed(
-      id: UUID().uuidString,
+//      id: UUID().uuidString,
       title: feed.title ?? "",
       url: feedURL.absoluteString,
       lastUpdated: articles?.first?.publishedAt,  // date情報ないかも
