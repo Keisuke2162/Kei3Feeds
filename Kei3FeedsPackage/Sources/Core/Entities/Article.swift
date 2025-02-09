@@ -1,13 +1,13 @@
 import Foundation
 
 public struct Article {
-  let title: String
-  let link: URL
-  let publishedAt: Date
-  let imageURL: URL
-  let description: String
+  public let title: String
+  public let link: String
+  public let publishedAt: Date?
+  public let imageURL: String?
+  public let description: String
 
-  public init(title: String, link: URL, publishedAt: Date, imageURL: URL, description: String) {
+  public init(title: String, link: String, publishedAt: Date?, imageURL: String?, description: String) {
     self.title = title
     self.link = link
     self.publishedAt = publishedAt
