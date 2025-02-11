@@ -37,8 +37,7 @@ public class FeedListViewModel: ObservableObject {
   private func makeCustomFeeds(feeds: [FeedModel]) {
     customFeeds.removeAll()
     let urls = feeds.map { $0.url }
-    
-    // TODO: ここどうなの？
+    // FIXME: ここどうなの？（async let で全部取得してから描画でも）
     for url in urls {
       Task {
         do {
@@ -49,7 +48,6 @@ public class FeedListViewModel: ObservableObject {
         } catch {
           // TODO: Error
         }
-        
       }
     }
   }

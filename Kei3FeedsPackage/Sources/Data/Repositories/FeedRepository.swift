@@ -62,7 +62,6 @@ public final class FeedRepository: FeedRepositoryProtocol {
   private func transformRssFeed(_ feedURL: URL, _ feed: RSSFeed) -> CustomFeed {
     let articles = feed.items?.compactMap { item -> Article? in
       guard let title = item.title, let link = item.link else { return nil }
-      
       return Article(
         title: title,
         link: link,
@@ -71,6 +70,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
         description: item.description ?? ""
       )
     }
+
     return CustomFeed(
 //      id: UUID().uuidString,
       title: feed.title ?? "",
