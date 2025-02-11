@@ -31,13 +31,4 @@ public class SearchViewModel: ObservableObject {
       }
     }
   }
-
-//  public func onTapRegisterButton(context: ModelContext) {
-//    guard let customFeed = searchResultCustomFeed, let url = URL(string: customFeed.url) else {
-//      return
-//    }
-//
-//    let feedModel = FeedModel(title: customFeed.title, url: url)
-//    context.insert(feedModel)
-//  }
 }

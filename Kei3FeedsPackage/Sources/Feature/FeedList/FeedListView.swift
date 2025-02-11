@@ -84,18 +84,18 @@ public struct FeedListView: View {
             .clipShape(.rect(cornerRadius: 8))
             
             Button {
-              // TODO: おすすめ画面へ遷移
+              sheetType = .recommend
             } label: {
               Image(systemName: "list.triangle")
                 .padding(8)
-                .foregroundStyle(.white)
+                .foregroundStyle(viewModel.isRecommendLoading ? .gray : .white)
             }
             .frame(width: 56, height: 56)
-            .background(Color.cyan)
+            .background(viewModel.isRecommendLoading ? .gray : .cyan)
             .clipShape(.rect(cornerRadius: 8))
+            .disabled(viewModel.isRecommendLoading)
 
             Button {
-              // TODO: 検索画面へ遷移
               sheetType = .search
             } label: {
               Image(systemName: "magnifyingglass")
@@ -115,7 +115,7 @@ public struct FeedListView: View {
       case .setting:
         EmptyView()
       case .recommend:
-        EmptyView()
+        RecommendView(recommendFeeds: viewModel.recommendCustomFeeds, onAddFeed: viewModel.onAddFeedModel(customFeed:context:))
       case .search:
         SearchView(viewModel: SearchViewModel(feedRepository: viewModel.feedRepository, feeds: feeds, onAddFeed: viewModel.onAddFeedModel(customFeed:context:)))
       }

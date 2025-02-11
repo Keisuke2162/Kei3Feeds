@@ -4,6 +4,7 @@ import SwiftData
 import SwiftUI
 
 public struct SearchView: View {
+  @Query private var feeds: [FeedModel]
   @Environment(\.modelContext) private var context
   @StateObject var viewModel: SearchViewModel
   
@@ -18,9 +19,20 @@ public struct SearchView: View {
     VStack(spacing: 32) {
       Spacer()
         .frame(height: 48)
-      TextField("url", text: $text)
-        .padding(.horizontal, 32)
       
+      HStack(spacing: 16) {
+        TextField("url", text: $text)
+        Button {
+          text = ""
+        } label: {
+          Image(systemName: "xmark")
+        }
+        .frame(width: 32, height: 32)
+        .background(Color.cyan)
+        .clipShape(.rect(cornerRadius: 8))
+      }
+      .padding(.horizontal, 32)
+
       HStack(spacing: 32) {
         Spacer()
         
@@ -46,7 +58,6 @@ public struct SearchView: View {
       }
       .padding(.horizontal, 32)
       
-
       VStack {
         if let model = viewModel.searchResultCustomFeed {
           VStack(spacing: 16) {

@@ -18,7 +18,8 @@ public struct ArticleListView: View {
           Link(destination: URL(string: articles[index].link)!) {
             VStack(alignment: .leading, spacing: 8) {
               Text(articles[index].title)
-                .font(.subheadline)
+                .font(.headline)
+                .lineSpacing(4)
                 .padding(.top, 4)
               HStack {
                 Spacer()

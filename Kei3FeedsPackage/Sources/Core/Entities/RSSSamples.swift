@@ -1,12 +1,11 @@
 import Foundation
 
-public struct RSSSamples: Identifiable {
+public struct RecommendRSS: Identifiable {
   public var id: UUID = UUID()
-  let title: String
-  let url: URL
+  public let title: String
+  public let url: URL
   
-  public init(id: UUID, title: String, url: URL) {
-    self.id = id
+  public init(title: String, url: URL) {
     self.title = title
     self.url = url
   }
