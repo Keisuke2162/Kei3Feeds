@@ -54,7 +54,9 @@ public struct FeedListView: View {
           .onDelete { indexSet in
             for index in indexSet {
               // FIXME: ViewModelでdeleteする意味ある？
-              viewModel.onDeleteFeedModel(feed: feeds[index], context: context)
+              if let feed = feeds.first(where: { $0.url.absoluteString == viewModel.customFeeds[index].url }) {
+                viewModel.onDeleteFeedModel(feed: feed, customFeed: viewModel.customFeeds[index], context: context)
+              }
             }
           }
         }
@@ -63,11 +65,7 @@ public struct FeedListView: View {
             .opacity(viewModel.customFeeds.isEmpty ? 1 : 0)
         }
         .onAppear {
-          // viewModel.onAddFeedModel(feed: FeedModel(title: "yahoo", url: URL(string: "https://news.yahoo.co.jp/rss/topics/top-picks.xml")!), context: context)
           viewModel.onAppear(feeds: feeds)
-        }
-        .onChange(of: feeds) { _, newValue in
-          viewModel.onChangedFeeds(feeds: feeds)
         }
         
         VStack {
@@ -119,7 +117,7 @@ public struct FeedListView: View {
       case .recommend:
         EmptyView()
       case .search:
-        SearchView(viewModel: SearchViewModel(feedRepository: viewModel.feedRepository))
+        SearchView(viewModel: SearchViewModel(feedRepository: viewModel.feedRepository, feeds: feeds, onAddFeed: viewModel.onAddFeedModel(customFeed:context:)))
       }
     }
   }

@@ -26,12 +26,16 @@ public class FeedListViewModel: ObservableObject {
     makeCustomFeeds(feeds: feeds)
   }
   
-  public func onAddFeedModel(feed: FeedModel, context: ModelContext) {
-    context.insert(feed)
+  public func onAddFeedModel(customFeed: CustomFeed, context: ModelContext) {
+    guard let url = URL(string: customFeed.url) else { return }
+    let feedModel = FeedModel(title: customFeed.title, url: url)
+    customFeeds.append(customFeed)
+    context.insert(feedModel)
   }
 
-  public func onDeleteFeedModel(feed: FeedModel, context: ModelContext) {
+  public func onDeleteFeedModel(feed: FeedModel, customFeed: CustomFeed, context: ModelContext) {
     context.delete(feed)
+    customFeeds.removeAll { $0.url == customFeed.url }
   }
 
   private func makeCustomFeeds(feeds: [FeedModel]) {

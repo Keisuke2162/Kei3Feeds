@@ -8,6 +8,7 @@ public struct SearchView: View {
   @StateObject var viewModel: SearchViewModel
   
   @State var text: String = ""
+  @Environment(\.dismiss) var dismiss
 
   public init(viewModel: SearchViewModel) {
     _viewModel = StateObject(wrappedValue: viewModel)
@@ -50,13 +51,13 @@ public struct SearchView: View {
         if let model = viewModel.searchResultCustomFeed {
           VStack(spacing: 16) {
             Text(model.title)
-            
             Button {
-              viewModel.onTapRegisterButton(context: context)
+              viewModel.onAddFeed(model, context)
+              dismiss()
             } label: {
               Text("Register")
             }
-            .disabled(text == model.url)
+            .disabled(viewModel.feeds.contains { $0.url.absoluteString == model.url })
           }
         } else {
           Text("Empty")
