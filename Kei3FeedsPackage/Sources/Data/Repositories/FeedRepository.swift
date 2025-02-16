@@ -10,11 +10,16 @@ public final class FeedRepository: FeedRepositoryProtocol {
 
   public func fetchRSSMetadata(from url: URL) async throws -> RSSFeedMetaData {
     let (data, _) = try await URLSession.shared.data(from: url)
-    if let metadata = RSSMetaDataParser().parse(data: data) {
+    if let metadata = RSSMetaDataParser().parse(data: data, url: url) {
       return metadata
     } else {
       throw FeedError.unknown
     }
+  }
+
+  public func fetchArticles(url: URL) async throws -> [RSSArticle] {
+    let (data, _) = try await URLSession.shared.data(from: url)
+    return RSSArticleParser().parse(data: data)
   }
 
   public func fetchFeed(url: URL) async throws -> CustomFeed {
@@ -33,6 +38,38 @@ public final class FeedRepository: FeedRepositoryProtocol {
     }
   }
   
+  // Newpaper
+  public func fetchNewspaper(articles: [RSSArticle]) async throws -> [RSSNewspaper] {
+    var newspapers: [RSSNewspaper] = []
+    for article in articles {
+      let item = try await fetchNewspaperItem(article: article)
+      if let item {
+        newspapers.append(item)
+      }
+    }
+    return newspapers
+  }
+
+  private func fetchNewspaperItem(article: RSSArticle) async throws -> RSSNewspaper? {
+    guard let url = article.link else { return nil }
+    do {
+      let (data, _) = try await URLSession.shared.data(from: url)
+      let document = try SwiftSoup.parse(String(data: data, encoding: .utf8) ?? "")
+      let thumbnail = try document.select("meta[property=og:image]").first()?.attr("content")
+      let icon = try document.select("link[rel=icon]").attr("href")
+      let item = RSSNewspaper(
+        title: article.title,
+        link: url,
+        pubDate: article.pubDate,
+        thumbnailImageURL: URL(string: thumbnail ?? ""),
+        iconImageURL: URL(string: "")
+      )
+      return item
+    } catch {
+      return nil
+    }
+  }
+
   public func fetchOGP(articles: [Article]) async throws -> [Article] {
     var newArticles: [Article] = []
     for article in articles {

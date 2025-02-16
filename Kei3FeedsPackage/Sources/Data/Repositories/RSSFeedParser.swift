@@ -1,10 +1,3 @@
-//
-//  RSSFeedParser.swift
-//  Kei3FeedsPackage
-//
-//  Created by Kei on 2025/02/16.
-//
-
 import Foundation
 import Core
 
@@ -13,6 +6,7 @@ class RSSMetaDataParser: NSObject, XMLParserDelegate {
   private var title: String?
   private var lastUpdated: Date?
   private var dateFormatter: DateFormatter
+  private var isChannel: Bool = false
   
   override init() {
     self.dateFormatter = DateFormatter()
@@ -20,13 +14,20 @@ class RSSMetaDataParser: NSObject, XMLParserDelegate {
   
   func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
     currentElement = elementName
+    if elementName == "channel" {
+      isChannel = true
+    }
+    if elementName == "item" || elementName == "entry" {
+      isChannel = false
+    }
   }
   
   func parser(_ parser: XMLParser, foundCharacters string: String) {
     let trimmingString = string.trimmingCharacters(in: .whitespacesAndNewlines)
-    
-    if currentElement == "title", title == nil {
-      title = trimmingString
+    guard isChannel else { return }
+
+    if currentElement == "title", trimmingString != title {
+      title = (title ?? "") + trimmingString
     } else if currentElement == "lastBuildDate" || currentElement == "updated" || currentElement == "pubDate" {
       self.dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss Z"
       if let date = dateFormatter.date(from: trimmingString) {
@@ -40,9 +41,9 @@ class RSSMetaDataParser: NSObject, XMLParserDelegate {
     }
   }
   
-  func parse(data: Data) -> RSSFeedMetaData? {
+  func parse(data: Data, url: URL) -> RSSFeedMetaData? {
     let parser = XMLParser(data: data)
     parser.delegate = self
-    return parser.parse() ? RSSFeedMetaData(title: title ?? "", lastUpdated: lastUpdated) : nil
+    return parser.parse() ? RSSFeedMetaData(title: title ?? "", lastUpdated: lastUpdated, url: url) : nil
   }
 }

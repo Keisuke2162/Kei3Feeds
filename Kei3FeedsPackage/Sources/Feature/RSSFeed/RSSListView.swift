@@ -14,9 +14,14 @@ import SwiftData
 public class RSSListViewModel: ObservableObject {
   let feedRepository: any FeedRepositoryProtocol
   @Published var rssList: [RSSFeedMetaData] = []
-  @Published var sheetType: SheetType?
+  @Published var sheetType: RSSPageType?
   // MEMO: onAppearを2回目移行実行させないためのフラグ。あんま使いたくない
   var isLoaded: Bool = false
+
+  var newpapers: [RSSNewspaper] = []
+  @Published var isNewsLoading = false
+  // RSSArticleのキャッシュ
+  var rssArticlesChaches: [String : [RSSArticle]] = [:]
 
   public init(feedRepository: any FeedRepositoryProtocol) {
     self.feedRepository = feedRepository
@@ -24,7 +29,10 @@ public class RSSListViewModel: ObservableObject {
 
   // 画面表示時にSwiftDataに保存した情報からRSS一覧を作成する
   public func onAppear(feeds: [FeedModel]) {
-    fetchRSSMetadata(feeds)
+    Task {
+      try await fetchRSSMetadata(feeds)
+      fetchNewspaper()
+    }
   }
 
   // RSS一覧に追加
@@ -41,22 +49,44 @@ public class RSSListViewModel: ObservableObject {
     rssList.removeAll { $0.title == rss.title }
   }
 
-  public func onTapedSheetButton(type: SheetType) {
+  public func onTapedSheetButton(type: RSSPageType) {
     sheetType = type
   }
 
-  private func fetchRSSMetadata(_ feeds: [FeedModel]) {
+  private func fetchRSSMetadata(_ feeds: [FeedModel]) async throws {
     rssList.removeAll()
     let urls = feeds.map { $0.url }
     for url in urls {
-      Task {
-        do {
-          let rss = try await feedRepository.fetchRSSMetadata(from: url)
-          await MainActor.run {
-            self.rssList.append(rss)
-          }
-        } catch {
+      let rss = try await feedRepository.fetchRSSMetadata(from: url)
+      await MainActor.run {
+        self.rssList.append(rss)
+      }
+    }
+  }
+
+  /// バックグラウンドで最新の記事まとめを作る
+  /// その際[RSSArticle]を取得することになるのでRSSArticleListViewでのロードをしなくてもいいようにキャッシュするのもアリ
+  private func fetchNewspaper() {
+    Task {
+      do {
+        isNewsLoading = true
+        var selectionArticles: [RSSArticle] = []
+        // 登録している記事にRSSArticle配列を取得
+        for rss in rssList {
+          let articles = try await feedRepository.fetchArticles(url: rss.url)
+          // TODO: ここでキャッシュ
+
+          selectionArticles.append(contentsOf: articles.prefix(3))
         }
+        // 取得したRSSArticle配列から最新の3記事ずつ取得してシャッフル
+        selectionArticles.shuffle()
+        // それぞれの記事のサムネイルとアイコンを取得
+        let news = try await feedRepository.fetchNewspaper(articles: selectionArticles)
+        newpapers = news
+        print("テスト", news)
+        isNewsLoading = false
+      } catch {
+        print("テスト", error.localizedDescription)
       }
     }
   }
@@ -78,7 +108,10 @@ public struct RSSListView: View {
         List {
           ForEach(viewModel.rssList, id: \.id) { rss in
             NavigationLink {
-              Text("nav")
+              RSSArticleListView(viewModel: RSSArticleListViewModel(
+                feedRepository: viewModel.feedRepository,
+                rss: rss)
+              )
             } label: {
               VStack(alignment: .leading, spacing: 8) {
                 Text(rss.title)
@@ -122,24 +155,22 @@ public struct RSSListView: View {
               Image(systemName: "list.triangle")
                 .padding(8)
                 .foregroundStyle(.white)
-//                .foregroundStyle(viewModel.isRecommendLoading ? .gray : .white)
             }
             .frame(width: 56, height: 56)
             .background(Color.cyan)
             .clipShape(.rect(cornerRadius: 8))
-//            .background(viewModel.isRecommendLoading ? .gray : .cyan)
-//            .disabled(viewModel.isRecommendLoading)
 
             Button {
-              viewModel.sheetType = .search
+              viewModel.sheetType = .newspaper
             } label: {
-              Image(systemName: "magnifyingglass")
+              Image(systemName: "newspaper")
                 .padding(8)
-                .foregroundStyle(.white)
+                .foregroundStyle(viewModel.isNewsLoading ? .gray : .white)
             }
             .frame(width: 56, height: 56)
-            .background(Color.cyan)
+            .background(viewModel.isNewsLoading ? .gray : .cyan)
             .clipShape(.rect(cornerRadius: 8))
+            .disabled(viewModel.isNewsLoading)
           }
           .padding(.bottom, 16)
         }
@@ -154,7 +185,7 @@ public struct RSSListView: View {
         EmptyView()
       case .recommend:
         EmptyView()
-      case .search:
+      case .newspaper:
         EmptyView()
       }
     }
