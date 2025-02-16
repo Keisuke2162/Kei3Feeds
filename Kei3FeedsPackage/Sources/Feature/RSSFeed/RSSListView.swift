@@ -92,11 +92,71 @@ public struct RSSListView: View {
               }
             }
           }
+          .onDelete { indexSet in
+            for index in indexSet {
+              // FIXME: 要修正（titleで比較してるところurlにしたい）
+              if let feed = feeds.first(where: { $0.url.absoluteString == viewModel.rssList[index].title }) {
+                viewModel.onDeleteFeedModel(feed: feed, rss: viewModel.rssList[index], context: context)
+              }
+            }
+          }
+        }
+        
+        VStack {
+          Spacer()
+          HStack(spacing: 46) {
+            Button {
+              viewModel.sheetType = .setting
+            } label: {
+              Image(systemName: "gear")
+                .padding(8)
+                .foregroundStyle(.white)
+            }
+            .frame(width: 56, height: 56)
+            .background(Color.cyan)
+            .clipShape(.rect(cornerRadius: 8))
+            
+            Button {
+              viewModel.sheetType = .recommend
+            } label: {
+              Image(systemName: "list.triangle")
+                .padding(8)
+                .foregroundStyle(.white)
+//                .foregroundStyle(viewModel.isRecommendLoading ? .gray : .white)
+            }
+            .frame(width: 56, height: 56)
+            .background(Color.cyan)
+            .clipShape(.rect(cornerRadius: 8))
+//            .background(viewModel.isRecommendLoading ? .gray : .cyan)
+//            .disabled(viewModel.isRecommendLoading)
+
+            Button {
+              viewModel.sheetType = .search
+            } label: {
+              Image(systemName: "magnifyingglass")
+                .padding(8)
+                .foregroundStyle(.white)
+            }
+            .frame(width: 56, height: 56)
+            .background(Color.cyan)
+            .clipShape(.rect(cornerRadius: 8))
+          }
+          .padding(.bottom, 16)
         }
       }
     }
     .onAppear {
       viewModel.onAppear(feeds: feeds)
+    }
+    .sheet(item: $viewModel.sheetType) { type in
+      switch type {
+      case .setting:
+        EmptyView()
+      case .recommend:
+        EmptyView()
+      case .search:
+        EmptyView()
+      }
     }
   }
 }
