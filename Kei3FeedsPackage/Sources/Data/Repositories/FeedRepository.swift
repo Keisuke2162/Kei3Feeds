@@ -7,8 +7,15 @@ import SwiftSoup
 public final class FeedRepository: FeedRepositoryProtocol {
   public init() {
   }
-  
-  public func fetchRSSItems(url: URL) async throws -> 
+
+  public func fetchRSSMetadata(from url: URL) async throws -> RSSFeedMetaData {
+    let (data, _) = try await URLSession.shared.data(from: url)
+    if let metadata = RSSMetaDataParser().parse(data: data) {
+      return metadata
+    } else {
+      throw FeedError.unknown
+    }
+  }
 
   public func fetchFeed(url: URL) async throws -> CustomFeed {
     let feedParser = FeedParser(URL: url)

@@ -11,7 +11,8 @@ struct Kei3FeedsApp: App {
   
   var body: some Scene {
     WindowGroup {
-      FeedListView(viewModel: FeedListViewModel(feedRepository: feedRepository))
+      // FeedListView(viewModel: FeedListViewModel(feedRepository: feedRepository))
+      RSSListView(viewModel: RSSListViewModel(feedRepository: feedRepository))
     }
     .modelContainer(for: FeedModel.self)
   }
