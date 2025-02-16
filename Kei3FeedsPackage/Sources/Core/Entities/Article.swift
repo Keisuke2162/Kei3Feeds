@@ -7,7 +7,7 @@ public struct Article: Sendable, Hashable {
   public var published: String? {
     publishedAt?.toString()
   }
-  public let imageURL: String?
+  public var imageURL: String?
   public let description: String
 
   public init(title: String, link: String, publishedAt: Date?, imageURL: String?, description: String) {

@@ -12,11 +12,12 @@ let package = Package(
       .library(name: "Data", targets: ["Data"]),
     ],
     dependencies: [
-      .package(url: "https://github.com/nmdias/FeedKit.git", from: "9.1.2")
+      .package(url: "https://github.com/nmdias/FeedKit.git", from: "9.1.2"),
+      .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.7.7"),
     ],
     targets: [
       .target(name: "Core"),
-      .target(name: "Data", dependencies: ["FeedKit", "Domain", "Core"]),
+      .target(name: "Data", dependencies: ["FeedKit", "Domain", "Core", "SwiftSoup"]),
       .target(name: "Domain", dependencies: ["Core"]),
       .target(name: "Feature", dependencies: ["Domain", "Core"]),
     ]

@@ -37,7 +37,8 @@ public struct FeedListView: View {
         List {
           ForEach(viewModel.customFeeds, id: \.id) { feed in
             NavigationLink {
-              ArticleListView(articles: feed.articles)
+//              ArticleListView(articles: feed.articles)
+              ArticleRichPageView(articles: feed.articles)
             } label: {
               VStack(alignment: .leading, spacing: 8) {
                 Text(feed.title)

@@ -2,10 +2,13 @@ import Core
 import Foundation
 import Domain
 import FeedKit
+import SwiftSoup
 
 public final class FeedRepository: FeedRepositoryProtocol {
   public init() {
   }
+  
+  public func fetchRSSItems(url: URL) async throws -> 
 
   public func fetchFeed(url: URL) async throws -> CustomFeed {
     let feedParser = FeedParser(URL: url)
@@ -22,6 +25,17 @@ public final class FeedRepository: FeedRepositoryProtocol {
       }
     }
   }
+  
+  public func fetchOGP(articles: [Article]) async throws -> [Article] {
+    var newArticles: [Article] = []
+    for article in articles {
+      var newArticle = article
+      let ogpImageURL = await fetchOGImageAsync(from: article.link)
+      newArticle.imageURL = ogpImageURL
+      newArticles.append(newArticle)
+    }
+    return newArticles
+  }
 
   private func transformFeed(_ feedURL: URL, _ feed: Feed) -> CustomFeed {
     switch feed {
@@ -34,6 +48,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
     }
   }
 
+  // MARK: Atom
   // TODO: UUID().uuidStringはSwiftDataのidを使うように修正
   private func transformAtomFeed(_ feedURL: URL, _ feed: AtomFeed) -> CustomFeed {
     let articles = feed.entries?.compactMap { entry -> Article? in
@@ -59,6 +74,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
     )
   }
 
+  // MARK: RSS
   private func transformRssFeed(_ feedURL: URL, _ feed: RSSFeed) -> CustomFeed {
     let articles = feed.items?.compactMap { item -> Article? in
       guard let title = item.title, let link = item.link else { return nil }
@@ -66,11 +82,10 @@ public final class FeedRepository: FeedRepositoryProtocol {
         title: title,
         link: link,
         publishedAt: item.pubDate,
-        imageURL: item.media?.mediaThumbnails?.first?.attributes?.url,
+        imageURL: item.enclosure?.attributes?.url,
         description: item.description ?? ""
       )
     }
-
     return CustomFeed(
 //      id: UUID().uuidString,
       title: feed.title ?? "",
@@ -81,10 +96,10 @@ public final class FeedRepository: FeedRepositoryProtocol {
     )
   }
 
+  // MARK: JSON
   private func transformJsonFeed(_ feedURL: URL, _ feed: JSONFeed) -> CustomFeed {
     let articles = feed.items?.compactMap { item -> Article? in
       guard let title = item.title, let link = item.url else { return nil }
-      
       return Article(
         title: title,
         link: link,
@@ -93,6 +108,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
         description: item.contentText ?? ""
       )
     }
+
     return CustomFeed(
 //      id: UUID().uuidString,
       title: feed.title ?? "",
@@ -101,5 +117,18 @@ public final class FeedRepository: FeedRepositoryProtocol {
       imageURL: feed.icon,
       articles: articles ?? []
     )
+  }
+
+  private func fetchOGImageAsync(from url: String) async -> String? {
+    guard let articleURL = URL(string: url) else { return nil }
+    do {
+      let (data, _) = try await URLSession.shared.data(from: articleURL)
+      let html = String(data: data, encoding: .utf8)
+      let doc = try SwiftSoup.parse(html ?? "")
+      return try doc.select("meta[property=og:image]").first()?.attr("content")
+    } catch {
+      print("Failed fetch OGP: \(error)")
+      return nil
+    }
   }
 }

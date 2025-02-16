@@ -76,7 +76,8 @@ public class FeedListViewModel: ObservableObject {
     for url in urls {
       Task {
         do {
-          let customFeed = try await feedRepository.fetchFeed(url: url)
+          var customFeed = try await feedRepository.fetchFeed(url: url)
+          customFeed.articles = try await feedRepository.fetchOGP(articles: customFeed.articles)
           await MainActor.run {
             self.customFeeds.append(customFeed)
           }
@@ -92,7 +93,8 @@ public class FeedListViewModel: ObservableObject {
       isRecommendLoading = true
       for url in recommendURLs {
         do {
-          let feed = try await feedRepository.fetchFeed(url: url)
+          var feed = try await feedRepository.fetchFeed(url: url)
+          feed.articles = try await feedRepository.fetchOGP(articles: feed.articles)
           recommendCustomFeeds.append(feed)
         } catch {
           continue
