@@ -19,7 +19,7 @@ public class RSSListViewModel: ObservableObject {
   var isLoaded: Bool = false
 
   var newpapers: [RSSNewspaper] = []
-  @Published var isNewsLoading = false
+  @Published var isNewsLoading = true
   // RSSArticleのキャッシュ
   var rssArticlesChaches: [String : [RSSArticle]] = [:]
 
@@ -76,7 +76,7 @@ public class RSSListViewModel: ObservableObject {
           let articles = try await feedRepository.fetchArticles(url: rss.url)
           // TODO: ここでキャッシュ
 
-          selectionArticles.append(contentsOf: articles.prefix(3))
+          selectionArticles.append(contentsOf: articles.prefix(5))
         }
         // 取得したRSSArticle配列から最新の3記事ずつ取得してシャッフル
         selectionArticles.shuffle()
@@ -179,14 +179,14 @@ public struct RSSListView: View {
     .onAppear {
       viewModel.onAppear(feeds: feeds)
     }
-    .sheet(item: $viewModel.sheetType) { type in
+    .fullScreenCover(item: $viewModel.sheetType) { type in
       switch type {
       case .setting:
         EmptyView()
       case .recommend:
         EmptyView()
       case .newspaper:
-        EmptyView()
+        RSSNewspaperView(newspapers: viewModel.newpapers)
       }
     }
   }
