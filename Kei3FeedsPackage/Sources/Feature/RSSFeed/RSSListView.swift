@@ -23,21 +23,52 @@ public class RSSListViewModel: ObservableObject {
   // RSSArticleのキャッシュ
   var rssArticlesChaches: [String : [RSSArticle]] = [:]
 
+  @Published var isRecommendLoading: Bool = false
+  var recommendCustomFeeds: [RSSFeedMetaData] = []
+  let recommendURLs: [URL] = [
+    URL(string: "https://news.yahoo.co.jp/rss/topics/top-picks.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/domestic.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/world.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/business.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/entertainment.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/sports.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/it.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/science.xml")!,
+    URL(string: "https://news.yahoo.co.jp/rss/topics/local.xml")!,
+    URL(string: "https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml")!,
+    URL(string: "https://web.gekisaka.jp/feed")!,
+    URL(string: "https://number.bunshun.jp/list/rsssports")!,
+    URL(string: "https://toyokeizai.net/list/feed/rss")!,
+    URL(string: "https://bunshun.jp/list/feed/rss")!,
+    URL(string: "https://b.hatena.ne.jp/hotentry.rss")!,
+    URL(string: "https://gori.me/feed")!,
+    URL(string: "https://www.lifehacker.jp/feed/index.xml")!,
+    URL(string: "https://gigazine.net/news/rss_2.0/")!,
+    URL(string: "https://zenn.dev/feed")!,
+    URL(string: "https://rss.itmedia.co.jp/rss/2.0/ait.xml")!,
+    URL(string: "http://www.gizmodo.jp/atom.xml")!,
+    URL(string: "http://hamusoku.com/index.rdf")!,
+    URL(string: "https://blog.domesoccer.jp/feed")!,
+    URL(string: "https://prtimes.jp/index.rdf")!,
+  ]
+
   public init(feedRepository: any FeedRepositoryProtocol) {
     self.feedRepository = feedRepository
   }
 
   // 画面表示時にSwiftDataに保存した情報からRSS一覧を作成する
   public func onAppear(feeds: [FeedModel]) {
+    if isLoaded { return }
     Task {
       try await fetchRSSMetadata(feeds)
       fetchNewspaper()
+      fetchRecommends()
     }
   }
 
   // RSS一覧に追加
-  public func onAddFeedModel(url: URL, rss: RSSFeedMetaData, context: ModelContext) {
-    let feedModel = FeedModel(title: rss.title, url: url)
+  public func onAddFeedModel(rss: RSSFeedMetaData, context: ModelContext) {
+    let feedModel = FeedModel(title: rss.title, url: rss.url)
     rssList.append(rss)
     context.insert(feedModel)
   }
@@ -88,6 +119,21 @@ public class RSSListViewModel: ObservableObject {
       } catch {
         print("テスト", error.localizedDescription)
       }
+    }
+  }
+
+  private func fetchRecommends() {
+    Task {
+      isRecommendLoading = true
+      for url in recommendURLs {
+        do {
+          var feed = try await feedRepository.fetchRSSMetadata(from: url)
+          recommendCustomFeeds.append(feed)
+        } catch {
+          continue
+        }
+      }
+      isRecommendLoading = false
     }
   }
 }
@@ -154,11 +200,12 @@ public struct RSSListView: View {
             } label: {
               Image(systemName: "list.triangle")
                 .padding(8)
-                .foregroundStyle(.white)
+                .foregroundStyle(viewModel.isRecommendLoading ? .gray : .white)
             }
             .frame(width: 56, height: 56)
-            .background(Color.cyan)
+            .background(viewModel.isRecommendLoading ? .gray : .cyan)
             .clipShape(.rect(cornerRadius: 8))
+            .disabled(viewModel.isRecommendLoading)
 
             Button {
               viewModel.sheetType = .newspaper
@@ -184,7 +231,7 @@ public struct RSSListView: View {
       case .setting:
         EmptyView()
       case .recommend:
-        EmptyView()
+        RSSRecommendView(recommends: viewModel.recommendCustomFeeds, onAddFeed: viewModel.onAddFeedModel(rss:context:))
       case .newspaper:
         RSSNewspaperView(newspapers: viewModel.newpapers)
       }
