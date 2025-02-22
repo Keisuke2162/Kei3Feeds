@@ -11,10 +11,12 @@ public struct RSSRecommendView: View {
 
   // FIXME: クロージャでやるかViewModelでやるかFeedListViewModelでやるか設計に迷ってる
   let onAddFeed: (RSSFeedMetaData, ModelContext) -> Void
+  let onDeleteFeed: (FeedModel, ModelContext) -> Void
 
-  public init(recommends: [RSSFeedMetaData], onAddFeed: @escaping (RSSFeedMetaData, ModelContext) -> Void) {
+  public init(recommends: [RSSFeedMetaData], onAddFeed: @escaping (RSSFeedMetaData, ModelContext) -> Void, onDeleteFeed: @escaping (FeedModel, ModelContext) -> Void) {
     self.recommends = recommends
     self.onAddFeed = onAddFeed
+    self.onDeleteFeed = onDeleteFeed
   }
 
   public var body: some View {
@@ -25,15 +27,17 @@ public struct RSSRecommendView: View {
             Text(feed.title)
               .font(.headline)
             Spacer()
-            if !(feeds.contains(where: { $0.url == feed.url })) {
-              Button {
+            let isContaintsFeed = feeds.contains(where: { $0.url == feed.url })
+            Button {
+              if isContaintsFeed {
+                if let deleteFeed = feeds.first(where: { $0.url == feed.url }) {
+                  onDeleteFeed(deleteFeed, context)
+                }
+              } else {
                 onAddFeed(feed, context)
-              } label: {
-                Image(systemName: "arrow.down")
-                  .frame(width: 16, height: 16)
               }
-            } else {
-              Image(systemName: "checkmark")
+            } label: {
+              Image(systemName: isContaintsFeed ? "checkmark" : "arrow.down")
                 .frame(width: 16, height: 16)
             }
           }

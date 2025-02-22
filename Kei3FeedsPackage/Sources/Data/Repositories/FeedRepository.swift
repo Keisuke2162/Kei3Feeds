@@ -62,7 +62,7 @@ public final class FeedRepository: FeedRepositoryProtocol {
         link: url,
         pubDate: article.pubDate,
         thumbnailImageURL: URL(string: thumbnail ?? ""),
-        iconImageURL: URL(string: "")
+        iconImageURL: URL(string: icon)
       )
       return item
     } catch {

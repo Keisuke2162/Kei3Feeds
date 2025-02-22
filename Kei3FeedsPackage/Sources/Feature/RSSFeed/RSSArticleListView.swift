@@ -35,15 +35,22 @@ public struct RSSArticleListView: View {
         ForEach(viewModel.articles.indices, id: \.self) { index in
           if let link = viewModel.articles[index].link {
             Link(destination: link) {
-              Text(viewModel.articles[index].title)
-                .font(.headline)
-                .lineSpacing(4)
-                .padding(.top, 4)
-              HStack {
-                Spacer()
-                Text(viewModel.articles[index].pubDate?.toString() ?? "")
-                  .font(.caption)
+              VStack(spacing: 16) {
+                HStack {
+                  Text(viewModel.articles[index].title)
+                    .font(.subheadline).bold()
+                    .lineSpacing(4)
+                    .padding(.top, 4)
+                    .multilineTextAlignment(.leading)
+                  Spacer()
+                }
+                HStack {
+                  Spacer()
+                  Text(viewModel.articles[index].pubDate?.toString() ?? "")
+                    .font(.caption)
+                }
               }
+              .padding(.vertical, 8)
             }
             .foregroundStyle(colorScheme == .dark ? .white : .black)
           } else {

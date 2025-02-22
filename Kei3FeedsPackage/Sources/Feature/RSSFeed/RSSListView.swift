@@ -15,7 +15,7 @@ public class RSSListViewModel: ObservableObject {
   let feedRepository: any FeedRepositoryProtocol
   @Published var rssList: [RSSFeedMetaData] = []
   @Published var sheetType: RSSPageType?
-  // MEMO: onAppearを2回目移行実行させないためのフラグ。あんま使いたくない
+
   var isLoaded: Bool = false
 
   var newpapers: [RSSNewspaper] = []
@@ -23,7 +23,7 @@ public class RSSListViewModel: ObservableObject {
   // RSSArticleのキャッシュ
   var rssArticlesChaches: [String : [RSSArticle]] = [:]
 
-  @Published var isRecommendLoading: Bool = false
+  @Published var isRecommendLoading: Bool = true
   var recommendCustomFeeds: [RSSFeedMetaData] = []
   let recommendURLs: [URL] = [
     URL(string: "https://news.yahoo.co.jp/rss/topics/top-picks.xml")!,
@@ -72,12 +72,10 @@ public class RSSListViewModel: ObservableObject {
     rssList.append(rss)
     context.insert(feedModel)
   }
-
   // RSS一覧から削除
-  public func onDeleteFeedModel(feed: FeedModel, rss: RSSFeedMetaData, context: ModelContext) {
-    context.delete(feed)
-    // TODO: titleの比較からurlの比較に修正したい
-    rssList.removeAll { $0.title == rss.title }
+  public func onDeleteFeed(feedModel: FeedModel, context: ModelContext) {
+    context.delete(feedModel)
+    rssList.removeAll { $0.title == feedModel.title }
   }
 
   public func onTapedSheetButton(type: RSSPageType) {
@@ -97,7 +95,7 @@ public class RSSListViewModel: ObservableObject {
 
   /// バックグラウンドで最新の記事まとめを作る
   /// その際[RSSArticle]を取得することになるのでRSSArticleListViewでのロードをしなくてもいいようにキャッシュするのもアリ
-  private func fetchNewspaper() {
+  public func fetchNewspaper() {
     Task {
       do {
         isNewsLoading = true
@@ -107,7 +105,7 @@ public class RSSListViewModel: ObservableObject {
           let articles = try await feedRepository.fetchArticles(url: rss.url)
           // TODO: ここでキャッシュ
 
-          selectionArticles.append(contentsOf: articles.prefix(5))
+          selectionArticles.append(contentsOf: articles.prefix(2))
         }
         // 取得したRSSArticle配列から最新の3記事ずつ取得してシャッフル
         selectionArticles.shuffle()
@@ -127,7 +125,7 @@ public class RSSListViewModel: ObservableObject {
       isRecommendLoading = true
       for url in recommendURLs {
         do {
-          var feed = try await feedRepository.fetchRSSMetadata(from: url)
+          let feed = try await feedRepository.fetchRSSMetadata(from: url)
           recommendCustomFeeds.append(feed)
         } catch {
           continue
@@ -151,76 +149,58 @@ public struct RSSListView: View {
   public var body: some View {
     NavigationStack {
       ZStack {
-        List {
-          ForEach(viewModel.rssList, id: \.id) { rss in
-            NavigationLink {
-              RSSArticleListView(viewModel: RSSArticleListViewModel(
-                feedRepository: viewModel.feedRepository,
-                rss: rss)
-              )
-            } label: {
-              VStack(alignment: .leading, spacing: 8) {
-                Text(rss.title)
-                  .font(.subheadline)
-                  .padding(.top, 4)
+        VStack {
+          ScrollView {
+            ForEach(viewModel.rssList, id: \.id) { rss in
+              NavigationLink {
+                RSSArticleListView(viewModel: RSSArticleListViewModel(
+                  feedRepository: viewModel.feedRepository,
+                  rss: rss)
+                )
+              } label: {
+                
                 HStack {
-                  Text(rss.lastUpdatedString)
-                    .font(.caption)
+                  VStack(alignment: .leading, spacing: 8) {
+                    Text(rss.title)
+                      .font(.headline).bold()
+                      .multilineTextAlignment(.leading)
+                    HStack {
+                      Text(rss.lastUpdatedString)
+                        .font(.caption).bold()
+                    }
+                  }
+                  .padding(.leading, 16)
                   Spacer()
                 }
+                .padding(.vertical, 8)
               }
             }
-          }
-          .onDelete { indexSet in
-            for index in indexSet {
-              // FIXME: 要修正（titleで比較してるところurlにしたい）
-              if let feed = feeds.first(where: { $0.url.absoluteString == viewModel.rssList[index].title }) {
-                viewModel.onDeleteFeedModel(feed: feed, rss: viewModel.rssList[index], context: context)
-              }
-            }
+            Spacer().frame(height: 56)
           }
         }
-        
         VStack {
           Spacer()
           HStack(spacing: 46) {
-            Button {
-              viewModel.sheetType = .setting
-            } label: {
-              Image(systemName: "gear")
-                .padding(8)
-                .foregroundStyle(.white)
-            }
-            .frame(width: 56, height: 56)
-            .background(Color.cyan)
-            .clipShape(.rect(cornerRadius: 8))
-            
-            Button {
-              viewModel.sheetType = .recommend
-            } label: {
-              Image(systemName: "list.triangle")
-                .padding(8)
-                .foregroundStyle(viewModel.isRecommendLoading ? .gray : .white)
-            }
-            .frame(width: 56, height: 56)
-            .background(viewModel.isRecommendLoading ? .gray : .cyan)
-            .clipShape(.rect(cornerRadius: 8))
-            .disabled(viewModel.isRecommendLoading)
+            RectangleButton(
+              isLoading: viewModel.isRecommendLoading,
+              image: Image(systemName: "list.triangle"),
+              size: .init(width: 56, height: 56)) {
+                viewModel.sheetType = .recommend
+              }
 
-            Button {
-              viewModel.sheetType = .newspaper
-            } label: {
-              Image(systemName: "newspaper")
-                .padding(8)
-                .foregroundStyle(viewModel.isNewsLoading ? .gray : .white)
-            }
-            .frame(width: 56, height: 56)
-            .background(viewModel.isNewsLoading ? .gray : .cyan)
-            .clipShape(.rect(cornerRadius: 8))
-            .disabled(viewModel.isNewsLoading)
+            RectangleButton(
+              isLoading: viewModel.isNewsLoading,
+              image: Image(systemName: "newspaper"),
+              size: .init(width: 56, height: 56)) {
+                viewModel.sheetType = .newspaper
+              }
+              .disabled(viewModel.newpapers.isEmpty)
           }
           .padding(.bottom, 16)
         }
+      }
+      .onChange(of: feeds) { oldValue, newValue in
+        viewModel.fetchNewspaper()
       }
     }
     .onAppear {
@@ -231,9 +211,13 @@ public struct RSSListView: View {
       case .setting:
         EmptyView()
       case .recommend:
-        RSSRecommendView(recommends: viewModel.recommendCustomFeeds, onAddFeed: viewModel.onAddFeedModel(rss:context:))
+        RSSRecommendView(
+          recommends: viewModel.recommendCustomFeeds,
+          onAddFeed: viewModel.onAddFeedModel(rss:context:),
+          onDeleteFeed: viewModel.onDeleteFeed(feedModel:context:)
+        )
       case .newspaper:
-        RSSNewspaperView(newspapers: viewModel.newpapers)
+        RSSNewspaperCardView(newspapers: viewModel.newpapers)
       }
     }
   }

@@ -5,7 +5,7 @@ public struct RSSFeedMetaData: Sendable, Identifiable, Hashable {
   public let title: String
   public let lastUpdated: Date?
   public var lastUpdatedString: String {
-    lastUpdated?.toString() ?? ""
+    lastUpdated?.toString() ?? "----/--/--"
   }
   public let url: URL
 
