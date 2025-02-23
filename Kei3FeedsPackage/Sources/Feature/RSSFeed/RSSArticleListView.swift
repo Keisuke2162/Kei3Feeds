@@ -31,7 +31,7 @@ public struct RSSArticleListView: View {
 
   public var body: some View {
     ZStack {
-      List {
+      ScrollView {
         ForEach(viewModel.articles.indices, id: \.self) { index in
           if let link = viewModel.articles[index].link {
             Link(destination: link) {
@@ -51,6 +51,7 @@ public struct RSSArticleListView: View {
                 }
               }
               .padding(.vertical, 8)
+              .padding(.horizontal, 16)
             }
             .foregroundStyle(colorScheme == .dark ? .white : .black)
           } else {

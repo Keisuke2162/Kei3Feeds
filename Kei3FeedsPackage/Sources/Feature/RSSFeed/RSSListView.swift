@@ -158,20 +158,29 @@ public struct RSSListView: View {
                   rss: rss)
                 )
               } label: {
-                
                 HStack {
+                  Color.yellow.frame(width: 16)
                   VStack(alignment: .leading, spacing: 8) {
                     Text(rss.title)
                       .font(.headline).bold()
                       .multilineTextAlignment(.leading)
+                      .foregroundStyle(.white)
                     HStack {
                       Text(rss.lastUpdatedString)
                         .font(.caption).bold()
+                        .foregroundStyle(.white)
                     }
                   }
                   .padding(.leading, 16)
+                  .padding(.vertical, 16)
                   Spacer()
                 }
+                .clipShape(.rect(cornerRadius: 8))
+                .overlay {
+                  RoundedRectangle(cornerRadius: 8)
+                    .stroke(.yellow, lineWidth: 2)
+                }
+                .padding(.horizontal, 16)
                 .padding(.vertical, 8)
               }
             }
@@ -206,7 +215,7 @@ public struct RSSListView: View {
     .onAppear {
       viewModel.onAppear(feeds: feeds)
     }
-    .fullScreenCover(item: $viewModel.sheetType) { type in
+    .sheet(item: $viewModel.sheetType) { type in
       switch type {
       case .setting:
         EmptyView()

@@ -21,44 +21,42 @@ public struct RSSRecommendView: View {
 
   public var body: some View {
     ZStack {
-      List {
+      ScrollView {
         ForEach(recommends) { feed in
+          let isContaintsFeed = feeds.contains(where: { $0.url == feed.url })
           HStack {
+            isContaintsFeed ? Color.yellow.frame(width: 16) : Color.gray.frame(width: 16)
             Text(feed.title)
-              .font(.headline)
+              .font(.subheadline).bold()
+              .multilineTextAlignment(.leading)
+              .foregroundStyle(.white)
+              .padding(.vertical, 24)
             Spacer()
-            let isContaintsFeed = feeds.contains(where: { $0.url == feed.url })
-            Button {
-              if isContaintsFeed {
-                if let deleteFeed = feeds.first(where: { $0.url == feed.url }) {
-                  onDeleteFeed(deleteFeed, context)
+            Toggle("", isOn: Binding(
+              get: { isContaintsFeed },
+              set: { newValue in
+                if newValue {
+                  onAddFeed(feed, context)
+                } else {
+                  if let deleteFeed = feeds.first(where: { $0.url == feed.url }) {
+                    onDeleteFeed(deleteFeed, context)
+                  }
                 }
-              } else {
-                onAddFeed(feed, context)
               }
-            } label: {
-              Image(systemName: isContaintsFeed ? "checkmark" : "arrow.down")
-                .frame(width: 16, height: 16)
-            }
+            ))
+            .frame(maxWidth: 64)
+            .padding(.trailing, 16)
           }
-          .padding(.horizontal, 8)
-          .padding(.vertical, 16)
+          .clipShape(.rect(cornerRadius: 8))
+          .overlay {
+            RoundedRectangle(cornerRadius: 8)
+              .stroke(isContaintsFeed ? .yellow : .gray, lineWidth: 2)
+          }
+          .padding(.vertical, 8)
         }
       }
-
-      VStack {
-        Spacer()
-        Button {
-          dismiss()
-        } label: {
-          Image(systemName: "xmark")
-            .foregroundStyle(.white)
-            .padding(8)
-        }
-        .frame(width: 56, height: 56)
-        .background(.indigo)
-        .clipShape(.rect(cornerRadius: 28))
-      }
+      .padding(24)
+      .scrollIndicators(.hidden)
     }
   }
 }

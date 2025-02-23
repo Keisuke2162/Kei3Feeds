@@ -48,7 +48,7 @@ public struct RSSNewspaperCardView: View {
       VStack() {
         Text("PickUp")
           .font(.title).bold()
-          .padding(16)
+          .padding(48)
         Spacer()
         
         ZStack {
@@ -56,7 +56,6 @@ public struct RSSNewspaperCardView: View {
             Spacer()
             VStack() {
               Spacer()
-              
               VStack {
                 KFImage(newspapers[index].thumbnailImageURL)
                   .resizable()
@@ -70,28 +69,29 @@ public struct RSSNewspaperCardView: View {
                     .font(.subheadline).bold()
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.leading)
+                    .frame(height: 48)
                   Spacer()
                 }
-                .padding(16)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
                 HStack {
                   Spacer()
                   Link(destination: newspapers[index].link!) {
                     Text("read more")
-                      .font(.caption)
+                      .font(.callout)
                   }
                 }
-                .padding(8)
+                .padding(16)
               }
               .overlay {
                 RoundedRectangle(cornerRadius: 8)
-                  .stroke(Color.white, lineWidth: 8)
+                  .stroke(Color.yellow, lineWidth: 8)
               }
               Spacer()
             }
             Spacer()
           }
           .frame(width: proxy.size.width * 0.9, height: proxy.size.height * 0.8)
-          Spacer()
         }
         .shadow(radius: 10)
         .rotation3DEffect(
@@ -135,25 +135,10 @@ public struct RSSNewspaperCardView: View {
               
             }
         )
-        Spacer()
-        
         Text("\(index + 1) / \(newspapers.count)")
           .font(.caption).bold()
 
         Spacer()
-        VStack {
-          Spacer()
-          Button {
-            dismiss()
-          } label: {
-            Image(systemName: "xmark")
-              .foregroundStyle(.white)
-              .padding(8)
-          }
-          .frame(width: 56, height: 56)
-          .background(.indigo)
-          .clipShape(.rect(cornerRadius: 28))
-        }
       }
       .frame(maxWidth: .infinity)
     }
